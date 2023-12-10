@@ -10,10 +10,12 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  staging:
 
     runs-on: ubuntu-latest
     
+    env:
+      URL: ${{ secrets.STAGING_URL }}
     steps:
     - uses: actions/checkout@v3
     - name: Use Node.js 18.x
@@ -24,6 +26,12 @@ jobs:
 
     - name: Install Dependencies
       run: npm install
+
+    - name: Add Environment File
+      run: touch .env
+    
+    - name: "Write in variable"
+      run: echo USER =$URL >> .env
 
     - name: Install Playwright
       run: npx playwright install
@@ -42,4 +50,57 @@ jobs:
 
     - name: Output SoftUni Username
       run: echo alexanderstoyanov123
+  
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to production
+        uses: johnbeynon/render-deploy-action@v0.0.8
+        with:
+          service-id: ${{ secrets.MY_RENDER_SERVICE_ID }}
+          api-key: ${{ secrets.MY_RENDER_API_KEY }}
+          wait-for-success: true
+
+  production:
+    needs: deploy
+    runs-on: ubuntu-latest
     
+    env:
+      URL: ${{ secrets.PRODUCTION_URL }}
+      
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js 18.x
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18.x
+        cache: 'npm'
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Add Environment File
+      run: touch .env
+    
+    - name: "Write in variable"
+      run: echo USER =$URL >> .env
+
+    - name: Install Playwright
+      run: npx playwright install
+
+    - name: Run Application
+      run: npm run start &
+
+    - name: Sleep Thread
+      run: npm sleep 5
+
+    - name: Run Unit Tests
+      run: npm run test:unit
+
+    - name: Run UI Tests
+      run: npm run test:ui
+
+    - name: Output SoftUni Username
+      run: echo alexanderstoyanov123

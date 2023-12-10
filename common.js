@@ -1,3 +1,5 @@
-const url = 'http://localhost:8081';
+require('dotenv').config()
+
+const url = process.env.URL;
 
 export default url;
