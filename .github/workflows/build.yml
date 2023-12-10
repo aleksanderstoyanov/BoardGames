@@ -53,7 +53,7 @@ jobs:
   
 
   deploy:
-    needs: build
+    needs: staging
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to production
