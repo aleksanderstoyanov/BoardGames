@@ -40,7 +40,7 @@ jobs:
       run: npm run start &
 
     - name: Sleep Thread
-      run: npm sleep 5
+      run: sleep 5
 
     - name: Run Unit Tests
       run: npm run test:unit
